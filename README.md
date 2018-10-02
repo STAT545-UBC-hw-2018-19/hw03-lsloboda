@@ -2,7 +2,7 @@
 
 ## Overview
 **This repo contains the files relevant to STAT 545 Homework 03.**
-The homework file is located [here](https://github.com/STAT545-UBC-students/hw02-lsloboda/blob/master/hw02-gapminder.md).
+The homework file is located [here](https://github.com/STAT545-UBC-students/hw03-lsloboda/blob/master/hw03-gapminder.md).
 
 ## Purpose
 
