@@ -170,14 +170,37 @@ gapminder %>%
 Task 3
 ------
 
-**Task:** Compute a trimmed mean of life expectancy for different years. Or a weighted mean, weighting by population. Just try something other than the plain vanilla mean.
+**Task:** *Compute a trimmed mean of life expectancy for different years. Or a weighted mean, weighting by population. Just try something other than the plain vanilla mean.* \* I will examine the weighted mean (by population) of life expectancy for different years for Canada
 
-1.  Filter the data by continent
-2.  Select the GDP per capita
-3.  Find the minimum and maximum values by: (i) analyzing the range; (ii) querying the min and max directly
+1.  Filter the data for Canada
+2.  Select the year, population and life expectancy
+3.  x = year, y = life\_Exp; weight = pop
 4.  Present the data in a table
 5.  Visualize the data in a graph
 6.  Interpret the data *Reflections:*
+
+``` r
+gapminder %>% 
+  select(year, continent, lifeExp, pop) %>% 
+    group_by(year, continent) %>% 
+      summarize(mean_lifeExp = mean(lifeExp))
+```
+
+    ## # A tibble: 60 x 3
+    ## # Groups:   year [?]
+    ##     year continent mean_lifeExp
+    ##    <int> <fct>            <dbl>
+    ##  1  1952 Africa            39.1
+    ##  2  1952 Americas          53.3
+    ##  3  1952 Asia              46.3
+    ##  4  1952 Europe            64.4
+    ##  5  1952 Oceania           69.3
+    ##  6  1957 Africa            41.3
+    ##  7  1957 Americas          56.0
+    ##  8  1957 Asia              49.3
+    ##  9  1957 Europe            66.7
+    ## 10  1957 Oceania           70.3
+    ## # ... with 50 more rows
 
 Task 4
 ------

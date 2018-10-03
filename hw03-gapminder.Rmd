@@ -13,6 +13,7 @@ output:
 ```{r}
 suppressPackageStartupMessages(library(tidyverse))
 suppressPackageStartupMessages(library(gapminder))
+suppressPackageStartupMessages(library(knitr))
 ```
 
 * Take a snapshot of the data to *sanity check* that the data and variables appear as we expect:
@@ -25,8 +26,7 @@ suppressPackageStartupMessages(library(gapminder))
 *Using the suppress messages command from cm008 blocks the library loading message from outputting.*
 
 ## Task 1
-
-**Task:** Get the max and min GDP per capita for all continents
+*Get the max and min GDP per capita for all continents.*
 
 1. Filter the data by continent
 2. Select the GDP per capita
@@ -60,6 +60,7 @@ max_gdp <- select(gapminder, continent, gdpPercap) %>%
 
 #Merge data into a single table
 (min_max_gdp <- merge(min_gdp, max_gdp, by.x = "continent"))
+kable(min_max_gdp)
 
 #Sanity check the value
 str(min_max_gdp)
@@ -70,7 +71,7 @@ ggplot(min_max_gdp, aes(x = continent, y = value, color = variable)) +
   geom_point(aes(y = min_gdp, col = "min_gdp"), size=20, shape = "-") +
   geom_point(aes(y = max_gdp, col = "max_gdp"), size=20, shape = "-") +
   #Change y-axis to log-scale given the wide range in values
-  #scale_y_log10() +
+  scale_y_log10() +
   #Add labels
   labs(title = "Minimum & Maximum GDP per capita, all years",
   x = "Continent", y = "GDP per capita ($)", color = "Legend\n") +
@@ -115,13 +116,16 @@ https://www.dummies.com/programming/r/how-to-check-quantiles-in-r/
 gapminder %>% 
   select(continent, gdpPercap) %>% 
   group_by(continent) %>% 
-    summarize(Mean=mean(gdpPercap), SD=sd(gdpPercap), Var=var(gdpPercap))
+    summarize(Mean=mean(gdpPercap), Median = median(gdpPercap), SD=sd(gdpPercap), Var=var(gdpPercap)) %>% 
+     kable()
 
 #Visualize the data in a graph (violin plot)
 gapminder %>% 
   select(continent, gdpPercap) %>% 
   group_by(continent) %>% 
     ggplot(aes(continent, gdpPercap)) +
+    #Change y-axis to log-scale given the wide range in values
+    scale_y_log10() +
     geom_violin() +
   #Add labels
   labs(title = "Spread of GDP per capita, all years",
@@ -132,6 +136,8 @@ gapminder %>%
   select(continent, gdpPercap) %>% 
   group_by(continent) %>% 
     ggplot(aes(continent, gdpPercap)) +
+    #Change y-axis to log-scale given the wide range in values
+     scale_y_log10() +
     geom_boxplot() +
   #Add labels
   labs(title = "Spread of GDP per capita, all years",
@@ -144,19 +150,38 @@ gapminder %>%
 **Task:** *Compute a trimmed mean of life expectancy for different years. Or a weighted mean, weighting by population. Just try something other than the plain vanilla mean.*
 * I will examine the weighted mean (by population) of life expectancy for different years for Canada
 
-1. Filter the data for Canada
-2. Select the year, population and life expectancy
-3. x = year, y = life_Exp; weight = pop
+2. Select the year, continent, population and life expectancy
+3. Evaluate the traditional mean, weighted mean by population and trimmed mean (trimming 5 values on either end of the data)
 4. Present the data in a table
 5. Visualize the data in a graph
 6. Interpret the data
 *Reflections:*
+*there's way too much data to view it for all years in table format; graph format is better for this*
+*table format shows the exact values, which is a nice benefit*
 
 ```{r}
-gapminder %>% 
+(mean_comp <- gapminder) %>% 
   select(year, continent, lifeExp, pop) %>% 
-    group_by(year, continent) %>% 
-      summarize(mean_lifeExp = mean(lifeExp))
+      group_by(year, continent) %>% 
+       summarize(mean_lifeExp = mean(lifeExp), w_mean_lifeExp = weighted.mean(lifeExp, pop), t_mean_lifeExp = mean(lifeExp, trim = 0.3)) %>% 
+        kable()
+
+#Visualize the data in a graph
+
+w_mean <- gapminder %>%
+  group_by(year,continent) %>%
+   summarize(w_mean = weighted.mean(lifeExp, pop))
+
+spread_w_mean <- spread(w_mean, key = "year", value = "w_mean")
+kable(spread_w_mean)
+
+w_mean %>%
+  ggplot(aes(year, w_mean)) +
+  geom_point(aes(color = continent)) +
+  geom_line(method = 'lm', aes(color = continent)) +
+  #Add labels
+  labs(title = "Weighted Mean Life Expectancy over Time (Weighted by population)",
+    x = "Year", y = "Life Expectancy")
            
 ```
 
