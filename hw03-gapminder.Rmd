@@ -37,44 +37,45 @@ suppressPackageStartupMessages(library(gapminder))
 *Why would we want to look at the max and min GDP per capita for each continent? 
 (ii) Imagine we want to look at the distribution of min values and max values respectively to see if they are normal distributions.
 (iii) Perhaps we want to see the average min GDP and the average max GDP. Or find the countries with the biggest gap between min and max values, respectively, Or the widest range between min and max values.
-*Observations:*
+*Reflections:*
 *Finding the min and max directly is useful if you need to assign the values to individual variables, but using the range() command allows you to see both values faster with a single command. Both methods are used here because their redundancy permits error checking.*
-*
+*I used Stack Overflow for some ideas*
+*Other resources: https://www.math.ucla.edu/~anderson/rw1001/library/base/html/merge.html; https://www.sixhat.net/how-to-plot-multpile-data-series-with-ggplot.html;
+https://stackoverflow.com/questions/23635662/editing-legend-text-labels-in-ggplot*
+*Might be more realistic to look only at a particular year, using filter()*
+*Make observations about spread, range, thresholds)*
+*Used a bar instead of a bar, since this feels like a more natural symbol choice for a upper and lower limit*
+
 
 ```{r}
-# 1. Filter and select the necessary data
-gapminder %>% 
-  select(year, gdpPercap, continent) %>% 
-  #filter(country == "Germany") %>% 
-  ggplot(aes(year, gdpPercap)) +
-    geom_point()
+# Select the necessary data and group to reduce the size; Find the max and min values per continent
+min_gdp <- select(gapminder, continent, gdpPercap) %>% 
+  group_by(continent) %>% 
+    summarize(min_gdpPercap = min(gdpPercap))
 
-# 2. Assign a variable name to the desired data (for easy access)
-gdp <- (gapminder$gdpPercap)
+max_gdp <- select(gapminder, continent, gdpPercap) %>% 
+  group_by(continent) %>% 
+    summarize(max_gdpPercap = max(gdpPercap))
 
-# 3. Find the min and max
-(range(gdp))
-(min_gdp <- min(gdp))
-(max_gdp <- max(gdp))
+#Merge data into a single table
+(min_max_gdp <- merge(min_gdp, max_gdp, by.x = "continent"))
 
-# 4. Present the data in a table
+#Sanity check the value
+str(min_max_gdp)
+(range(gapminder$gdpPercap))
 
-# 5. Visualize the data in a graph
-
-gapminder %>%
-  group_by(continent, lifeExp > 60) %>% 
-  summarize(md = median(gdpPercap)) %>% 
-  arrange(md)
-  
-  gapminder %>%
-  mutate(hvsl = if_else(lifeExp >60, "high", "low")) %>% 
-  group_by(continent, hvsl) %>% 
-  summarize(md = median(gdpPercap)) %>% 
-  arrange(md)
-
+#Visualize the data in a graph
+ggplot(min_max_gdp, aes(x = continent, y = value, color = variable)) +
+  geom_point(aes(y = min_gdpPercap, col = "min_gdpPercap"), size=20, shape = "-") +
+  geom_point(aes(y = max_gdpPercap, col = "max_gdpPercap"), size=20, shape = "-") +
+  #Change y-axis to log-scale given the wide range in values
+  #scale_y_log10() +
+  #Add labels
+  labs(title = "Minimum & Maximum GDP per capita, over all years",
+  x = "Continent", y = "GDP per capita ($)", color = "Legend\n") +
+  scale_color_manual(labels = c("Maximum", "Minimum"), values = c("green", "red"))
 
 ```
-
 
 ## Task 2
 
@@ -89,6 +90,7 @@ gapminder %>%
 (i) Say we want to compare the relative ranges. We could compare just the min and max, but we will get a more complete picture by looking at the distribution.
 (ii) Perhaps we want to know which continent has the widest spread? Narrowest spread?
 (iii) 
+*Reflections:*
 
 ```{r}
 
@@ -105,6 +107,7 @@ gapminder %>%
 4. Present the data in a table
 5. Visualize the data in a graph
 6. Interpret the data
+*Reflections:*
 
 ```{r}
 
@@ -121,6 +124,7 @@ gapminder %>%
 4. Present the data in a table
 5. Visualize the data in a graph
 6. Interpret the data
+*Reflections:*
 
 ```{r}
 
