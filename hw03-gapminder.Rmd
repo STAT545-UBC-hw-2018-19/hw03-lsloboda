@@ -8,7 +8,7 @@ output:
 
 ## Initialize the data
 
-* Load the gapminder and tidyverse libraries:
+* Load the gapminder, tidyverse and knitr libraries:
 
 ```{r}
 suppressPackageStartupMessages(library(tidyverse))
@@ -16,57 +16,44 @@ suppressPackageStartupMessages(library(gapminder))
 suppressPackageStartupMessages(library(knitr))
 ```
 
-* Take a snapshot of the data to *sanity check* that the data and variables appear as we expect:
+
+* The knitr library is useful for improving the appearance of tables using the kable() command, described in more detail [here](https://www.rdocumentation.org/packages/knitr/versions/1.20/topics/kable).
+* We will take a quick look at the data to *sanity check* that the data and variables appear as we expect:
 
 ```{r}
 (head(gapminder))
 ```
 
-*Observations:*
-*Using the suppress messages command from cm008 blocks the library loading message from outputting.*
+* Everything looks as expected, so let's start exploring the data
 
 ## Task 1
 *Get the max and min GDP per capita for all continents.*
 
-1. Filter the data by continent
-2. Select the GDP per capita
-3. Find the minimum and maximum values by: (i) analyzing the range; (ii) querying the min and max directly
-4. Present the data in a table
-5. Visualize the data in a graph
-6. Interpret the data
-*Why would we want to look at the max and min GDP per capita for each continent? 
-(ii) Imagine we want to look at the distribution of min values and max values respectively to see if they are normal distributions.
-(iii) Perhaps we want to see the average min GDP and the average max GDP. Or find the countries with the biggest gap between min and max values, respectively, Or the widest range between min and max values.
-*Reflections:*
-*Finding the min and max directly is useful if you need to assign the values to individual variables, but using the range() command allows you to see both values faster with a single command. Both methods are used here because their redundancy permits error checking.*
-*I used Stack Overflow for some ideas*
-*Other resources: https://www.math.ucla.edu/~anderson/rw1001/library/base/html/merge.html; https://www.sixhat.net/how-to-plot-multpile-data-series-with-ggplot.html;
-https://stackoverflow.com/questions/23635662/editing-legend-text-labels-in-ggplot*
-*Might be more realistic to look only at a particular year, using filter()*
-*Make observations about spread, range, thresholds)*
-*Used a bar instead of a bar, since this feels like a more natural symbol choice for a upper and lower limit*
+### Method
+* Reduce the data subset using select and group_by
+* Find the minimum and maximum values
 
-
+### Table
 ```{r}
-# Select the necessary data and group to reduce the size; Find the max and min values per continent
+#Find the min
 min_gdp <- select(gapminder, continent, gdpPercap) %>% 
   group_by(continent) %>% 
     summarize(min_gdp = min(gdpPercap))
-
-
+#Find the max
 max_gdp <- select(gapminder, continent, gdpPercap) %>%
  group_by(continent) %>%
    summarize(max_gdp = max(gdpPercap))
-
 #Merge data into a single table
-(min_max_gdp <- merge(min_gdp, max_gdp, by.x = "continent"))
+min_max_gdp <- merge(min_gdp, max_gdp, by.x = "continent")
 kable(min_max_gdp)
-
-#Sanity check the value
+#Sanity check the values
 str(min_max_gdp)
 (range(gapminder$gdpPercap))
 
-#Visualize the data in a graph
+```
+
+### Plot
+```{r}
 ggplot(min_max_gdp, aes(x = continent, y = value, color = variable)) +
   geom_point(aes(y = min_gdp, col = "min_gdp"), size=20, shape = "-") +
   geom_point(aes(y = max_gdp, col = "max_gdp"), size=20, shape = "-") +
@@ -76,48 +63,33 @@ ggplot(min_max_gdp, aes(x = continent, y = value, color = variable)) +
   labs(title = "Minimum & Maximum GDP per capita, all years",
   x = "Continent", y = "GDP per capita ($)", color = "Legend\n") +
   scale_color_manual(labels = c("Maximum", "Minimum"), values = c("green", "red"))
-
-#Another way to interpret the data
-# gapminder %>% 
-#   select(year, continent, country, gdpPercap) %>% 
-#       group_by(continent) %>% 
-#         group_by(year) %>% 
-#          summarize(min_gdp = min(gdpPercap))
-#ggplot(min_max_gdp, aes(gdpPercap)) +
-#  facet_wrap( ~ continent, scale = "free_x") +
-#  geom_histogram()
-
 ```
+
+### Observations & Analysis
+* We see that the minimum GDP per capita for Oceania is significantly higher than the other continents. Africa and Asia both have very low GDP per capita relative to the other continents. The widest range in GDP per capita is observed in Asia, while the smallest range is observed in Oceania.
+* It's challenging to imagine a practical use for the data in this form (i.e. with all years of data present). I feel it would be more likely to determine the min and max values of GDP for a particular year (i.e. using filter()).
+* I chose to use a line to represent the limit values because I felt that this symbol is a more appropriate indicator of an upper and lower limit than a point.
+* Representing the min and max values only may offer a simplified view of the data for applications where the complete spread is not necessary or overly complex.
 
 ## Task 2
 *Look at the spread of GDP per capita within the continents.*
 
-The initial approach is similar to Task 1:
-*1. Filter the data by continent*
-*2. Select the GDP per capita*
-Now, let's consider the spread of the data, rather than the upper and lower limits:
-3. Find the spread of the data
-4. Present the data in a table
-5. Visualize the data in a graph
-6. Interpret the data
-(i) Say we want to compare the relative ranges. We could compare just the min and max, but we will get a more complete picture by looking at the distribution.
-(ii) Perhaps we want to know which continent has the widest spread? Narrowest spread?
-(iii) Referred to 
-*Reflections:*
-*What different observations would I make based on this data vs. the previous? What are the adv/disadv of this analysis?*
-https://www.dummies.com/programming/r/how-to-check-quantiles-in-r/
-*the min and max values determined in Task 1 are also shown in the spread, but the spread also gives us more information*
-*Could also filter for a specific year or range of years; could also use faceting to display min/max per continent for all years*
+### Method
+* Reduce the data subset using select() and group_by();
+* Find the key indicators of spread (i.e. mean, variance, etc.)
 
+### Table
 ```{r}
-# Select the necessary data and group to reduce the size; Find the spread of values per continent
-#Evaluate the data range using statistical commands
 gapminder %>% 
   select(continent, gdpPercap) %>% 
   group_by(continent) %>% 
     summarize(Mean=mean(gdpPercap), Median = median(gdpPercap), SD=sd(gdpPercap), Var=var(gdpPercap)) %>% 
      kable()
 
+```
+
+### Plots
+```{r}
 #Visualize the data in a graph (violin plot)
 gapminder %>% 
   select(continent, gdpPercap) %>% 
@@ -143,30 +115,34 @@ gapminder %>%
   x = "Continent", y = "GDP per capita ($)")
 ```
 
+### Observations & Analysis
+* The data shown in Task 2 is a more thorough evaluation of the data from Task 1. The same observations are apparent rom Task 1, but we can make additional observations of the spread of the data within the upper and lower limits. For example, we observe that the spread for Asia has very long whisker quantiles. Comparatively, the spread for Oceania is approximately even between all quantiles.
+* The highest mean GDP per capita, in descending order, is: Oceania, Europe, Americas, Asia, Africa.
+* Generally, the table format is more useful for reading exact numbers, while the plot is useful for quickly spotting trends.
+* Another way to analyze the data would be through using a facet_wrap() to separate the plots for each continent.
 
 ## Task 3
 *Compute a trimmed mean of life expectancy for different years. Or a weighted mean, weighting by population. Just try something other than the plain vanilla mean.*
-* I will examine the weighted mean (by population) of life expectancy for different years for Canada
 
-2. Select the year, continent, population and life expectancy
-3. Evaluate the traditional mean, weighted mean by population and trimmed mean (trimming 5 values on either end of the data)
-4. Present the data in a table
-5. Visualize the data in a graph
-6. Interpret the data
-*Reflections:*
-*there's way too much data to view it for all years in table format; graph format is better for this*
-*table format shows the exact values, which is a nice benefit*
+### Method
+* Reduce the data subset using select() and group_by();
+* Compare the traditional mean, weighted mean by population and trimmed mean (trimming 5 values on either end of the data);
+* Examine one type of mean in further detail.
+
+### Tables
+* First, we will compare the mean life expectancy, as calculated using different types of means, over only the 1980s, in order to make the output simpler:
 
 ```{r}
 (mean_comp <- gapminder) %>% 
   select(year, continent, lifeExp, pop) %>% 
+    filter(year >1980 & year <1990) %>% 
       group_by(year, continent) %>% 
        summarize(mean_lifeExp = mean(lifeExp), w_mean_lifeExp = weighted.mean(lifeExp, pop), t_mean_lifeExp = mean(lifeExp, trim = 0.3)) %>% 
         kable()
 ```
 
-#Let's take one subset of the data
-
+* We observe from the data above that there is a small value difference between the different types of means
+* For the next analysis, we will only consider the weighted mean (for simplicity), but we will now consider all years:
 
 ```{r}
 w_mean <- gapminder %>%
@@ -178,31 +154,30 @@ kable(spread_w_mean)
            
 ```
 
-Plot
-
+### Plot
 ```{r}
 w_mean %>%
   ggplot(aes(year, w_mean)) +
   geom_point(aes(color = continent)) +
-  geom_line(method = 'lm', aes(color = continent)) +
+  geom_line(aes(color = continent)) +
   #Add labels
   labs(title = "Weighted Mean Life Expectancy over Time (Weighted by population)",
     x = "Year", y = "Life Expectancy")
 ```
 
+### Observations & Analysis
+* From the data, we can observe that the life Expectancy for Africa is lower than the other continents for all years studied, while the life expectancy for Oceania is consistenly the highest among continents. The trend lines do not intersect, therefore the rank of life expectancy has not changed over this time period. Further, all continents have experienced an increase in life expectancy over the time evaluated. The only exception is a decrease in the life expectancy of Asia in 1963.
+* This task clearly shows that a plot can display significantly more data than a table. The first table was truncated to show only one decade worth of data in order to fit in a reasonable amount of space on the screen. The second table requires a scroll bar to view all of the data, so it is not easy to glimpse the data all at once. The graph shows the most information with the most clarity.
 
 ## Task 4
 *How is life expectancy changing over time on different continents?*
 
-1. Filter the data by continent
-2. Select the GDP per capita
-3. Find the minimum and maximum values by: (i) analyzing the range; (ii) querying the min and max directly
-4. Present the data in a table
-5. Visualize the data in a graph
-6. Interpret the data
-*Reflections:*
-*Lots of trials and error to realize that you can group after the mutate command; initially I was thinking that you could only group at the beginning*
+### Method
+* Reduce the data subset using select() and group_by()
+* Compare the traditional mean, weighted mean by population and trimmed mean (trimming 5 values on either end of the data)
+* Examine one type of mean in further detail
 
+### Table
 ```{r}
 del_lifeExp <- gapminder %>%
   group_by(continent) %>%
@@ -218,7 +193,7 @@ kable(lifeExp_stats)
 
 ```
 
-#plot
+### Plots
 
 ```{r}
 #Plotting
@@ -233,3 +208,11 @@ del_lifeExp %>%
 
 ```
 
+### Observation & Analysis
+* We observe that the change in life expectancy has not changed by more than 3 years (year over year) for any continent, over the time period studied. Specific observations can also be made regarding each continent. For example, Africa has experienced a very minor change in life expectancy since 1990, which represents a significant drop from previous years.
+* Facetting is a useful way of separating data which may be too confusing if plotted all together on the same plot. Although I think the data would still be manageable to explore on one plot, I decided to use facetting in this example to show how the separation of plots allows for easier interpretation of data for each continent.
+
+### Resources
+https://www.math.ucla.edu/~anderson/rw1001/library/base/html/merge.html https://www.sixhat.net/how-to-plot-multpile-data-series-with-ggplot.html
+https://stackoverflow.com/questions/23635662/editing-legend-text-labels-in-ggplot
+https://www.dummies.com/programming/r/how-to-check-quantiles-in-r/
