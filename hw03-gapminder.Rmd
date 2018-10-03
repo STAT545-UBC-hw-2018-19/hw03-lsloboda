@@ -51,11 +51,12 @@ https://stackoverflow.com/questions/23635662/editing-legend-text-labels-in-ggplo
 # Select the necessary data and group to reduce the size; Find the max and min values per continent
 min_gdp <- select(gapminder, continent, gdpPercap) %>% 
   group_by(continent) %>% 
-    summarize(min_gdpPercap = min(gdpPercap))
+    summarize(min_gdp = min(gdpPercap))
 
-max_gdp <- select(gapminder, continent, gdpPercap) %>% 
-  group_by(continent) %>% 
-    summarize(max_gdpPercap = max(gdpPercap))
+
+max_gdp <- select(gapminder, continent, gdpPercap) %>%
+ group_by(continent) %>%
+   summarize(max_gdp = max(gdpPercap))
 
 #Merge data into a single table
 (min_max_gdp <- merge(min_gdp, max_gdp, by.x = "continent"))
@@ -66,8 +67,8 @@ str(min_max_gdp)
 
 #Visualize the data in a graph
 ggplot(min_max_gdp, aes(x = continent, y = value, color = variable)) +
-  geom_point(aes(y = min_gdpPercap, col = "min_gdpPercap"), size=20, shape = "-") +
-  geom_point(aes(y = max_gdpPercap, col = "max_gdpPercap"), size=20, shape = "-") +
+  geom_point(aes(y = min_gdp, col = "min_gdp"), size=20, shape = "-") +
+  geom_point(aes(y = max_gdp, col = "max_gdp"), size=20, shape = "-") +
   #Change y-axis to log-scale given the wide range in values
   #scale_y_log10() +
   #Add labels
@@ -81,19 +82,40 @@ ggplot(min_max_gdp, aes(x = continent, y = value, color = variable)) +
 
 **Task:** Look at the spread of GDP per capita within the continents
 
-1. Filter the data by continent
-2. Select the GDP per capita
-3. Find the minimum and maximum values by: (i) analyzing the range; (ii) querying the min and max directly
+The initial approach is similar to Task 1:
+*1. Filter the data by continent*
+*2. Select the GDP per capita*
+Now, let's consider the spread of the data, rather than the upper and lower limits:
+3. Find the spread of the data
 4. Present the data in a table
 5. Visualize the data in a graph
 6. Interpret the data
 (i) Say we want to compare the relative ranges. We could compare just the min and max, but we will get a more complete picture by looking at the distribution.
 (ii) Perhaps we want to know which continent has the widest spread? Narrowest spread?
-(iii) 
+(iii) Referred to 
 *Reflections:*
+*What different observations would I make based on this data vs. the previous? What are the adv/disadv of this analysis?*
+https://www.dummies.com/programming/r/how-to-check-quantiles-in-r/
+
 
 ```{r}
+# Select the necessary data and group to reduce the size; Find the spread of values per continent
+#Evaluate the data range using statistical commands
+gapminder %>% 
+  select(continent, gdpPercap) %>% 
+  group_by(continent) %>% 
+    summarize(Mean=mean(gdpPercap), SD=sd(gdpPercap), Var=var(gdpPercap))
 
+#Visualize the data in a graph (try box plot, violin plot)
+ggplot(min_max_gdp, aes(x = continent, y = value, color = variable)) +
+  geom_point(aes(y = min_gdpPercap, col = "min_gdpPercap"), size=20, shape = "-") +
+  geom_point(aes(y = max_gdpPercap, col = "max_gdpPercap"), size=20, shape = "-") +
+  #Change y-axis to log-scale given the wide range in values
+  #scale_y_log10() +
+  #Add labels
+  labs(title = "Minimum & Maximum GDP per capita, over all years",
+  x = "Continent", y = "GDP per capita ($)", color = "Legend\n") +
+  scale_color_manual(labels = c("Maximum", "Minimum"), values = c("green", "red"))
 ```
 
 
