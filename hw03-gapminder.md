@@ -114,7 +114,7 @@ Task 2
 
 ### Method
 
--   Reduce the data subset using select() and group\_by();
+-   Reduce the data subset using select() and group\_by()
 -   Find the key indicators of spread (i.e. mean, variance, etc.)
 
 ### Table
@@ -183,9 +183,9 @@ Task 3
 
 ### Method
 
--   Reduce the data subset using select() and group\_by();
--   Compare the traditional mean, weighted mean by population and trimmed mean (trimming 5 values on either end of the data);
--   Examine one type of mean in further detail.
+-   Reduce the data subset using select() and group\_by()
+-   Compare the traditional mean, weighted mean by population and trimmed mean (trimming 5 values on either end of the data)
+-   Examine one type of mean in further detail
 
 ### Tables
 
@@ -290,7 +290,6 @@ kable(lifeExp_stats)
 ### Plots
 
 ``` r
-#Plotting
 del_lifeExp %>%
   ggplot(aes(year, mean_del)) +
   facet_wrap( ~ continent) +

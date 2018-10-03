@@ -75,7 +75,7 @@ ggplot(min_max_gdp, aes(x = continent, y = value, color = variable)) +
 *Look at the spread of GDP per capita within the continents.*
 
 ### Method
-* Reduce the data subset using select() and group_by();
+* Reduce the data subset using select() and group_by()
 * Find the key indicators of spread (i.e. mean, variance, etc.)
 
 ### Table
@@ -125,9 +125,9 @@ gapminder %>%
 *Compute a trimmed mean of life expectancy for different years. Or a weighted mean, weighting by population. Just try something other than the plain vanilla mean.*
 
 ### Method
-* Reduce the data subset using select() and group_by();
-* Compare the traditional mean, weighted mean by population and trimmed mean (trimming 5 values on either end of the data);
-* Examine one type of mean in further detail.
+* Reduce the data subset using select() and group_by()
+* Compare the traditional mean, weighted mean by population and trimmed mean (trimming 5 values on either end of the data)
+* Examine one type of mean in further detail
 
 ### Tables
 * First, we will compare the mean life expectancy, as calculated using different types of means, over only the 1980s, in order to make the output simpler:
@@ -196,7 +196,6 @@ kable(lifeExp_stats)
 ### Plots
 
 ```{r}
-#Plotting
 del_lifeExp %>%
   ggplot(aes(year, mean_del)) +
   facet_wrap( ~ continent) +
