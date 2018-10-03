@@ -53,22 +53,23 @@ Task 1
 # Select the necessary data and group to reduce the size; Find the max and min values per continent
 min_gdp <- select(gapminder, continent, gdpPercap) %>% 
   group_by(continent) %>% 
-    summarize(min_gdpPercap = min(gdpPercap))
+    summarize(min_gdp = min(gdpPercap))
 
-max_gdp <- select(gapminder, continent, gdpPercap) %>% 
-  group_by(continent) %>% 
-    summarize(max_gdpPercap = max(gdpPercap))
+
+max_gdp <- select(gapminder, continent, gdpPercap) %>%
+ group_by(continent) %>%
+   summarize(max_gdp = max(gdpPercap))
 
 #Merge data into a single table
 (min_max_gdp <- merge(min_gdp, max_gdp, by.x = "continent"))
 ```
 
-    ##   continent min_gdpPercap max_gdpPercap
-    ## 1    Africa      241.1659      21951.21
-    ## 2  Americas     1201.6372      42951.65
-    ## 3      Asia      331.0000     113523.13
-    ## 4    Europe      973.5332      49357.19
-    ## 5   Oceania    10039.5956      34435.37
+    ##   continent    min_gdp   max_gdp
+    ## 1    Africa   241.1659  21951.21
+    ## 2  Americas  1201.6372  42951.65
+    ## 3      Asia   331.0000 113523.13
+    ## 4    Europe   973.5332  49357.19
+    ## 5   Oceania 10039.5956  34435.37
 
 ``` r
 #Sanity check the value
@@ -76,9 +77,9 @@ str(min_max_gdp)
 ```
 
     ## 'data.frame':    5 obs. of  3 variables:
-    ##  $ continent    : Factor w/ 5 levels "Africa","Americas",..: 1 2 3 4 5
-    ##  $ min_gdpPercap: num  241 1202 331 974 10040
-    ##  $ max_gdpPercap: num  21951 42952 113523 49357 34435
+    ##  $ continent: Factor w/ 5 levels "Africa","Americas",..: 1 2 3 4 5
+    ##  $ min_gdp  : num  241 1202 331 974 10040
+    ##  $ max_gdp  : num  21951 42952 113523 49357 34435
 
 ``` r
 (range(gapminder$gdpPercap))
@@ -89,12 +90,12 @@ str(min_max_gdp)
 ``` r
 #Visualize the data in a graph
 ggplot(min_max_gdp, aes(x = continent, y = value, color = variable)) +
-  geom_point(aes(y = min_gdpPercap, col = "min_gdpPercap"), size=20, shape = "-") +
-  geom_point(aes(y = max_gdpPercap, col = "max_gdpPercap"), size=20, shape = "-") +
+  geom_point(aes(y = min_gdp, col = "min_gdp"), size=20, shape = "-") +
+  geom_point(aes(y = max_gdp, col = "max_gdp"), size=20, shape = "-") +
   #Change y-axis to log-scale given the wide range in values
   #scale_y_log10() +
   #Add labels
-  labs(title = "Minimum & Maximum GDP per capita, over all years",
+  labs(title = "Minimum & Maximum GDP per capita, all years",
   x = "Continent", y = "GDP per capita ($)", color = "Legend\n") +
   scale_color_manual(labels = c("Maximum", "Minimum"), values = c("green", "red"))
 ```
@@ -102,7 +103,15 @@ ggplot(min_max_gdp, aes(x = continent, y = value, color = variable)) +
 ![](hw03-gapminder_files/figure-markdown_github/unnamed-chunk-3-1.png)
 
 ``` r
-#increase point size
+#Another way to interpret the data
+# gapminder %>% 
+#   select(year, continent, country, gdpPercap) %>% 
+#       group_by(continent) %>% 
+#         group_by(year) %>% 
+#          summarize(min_gdp = min(gdpPercap))
+#ggplot(min_max_gdp, aes(gdpPercap)) +
+#  facet_wrap( ~ continent, scale = "free_x") +
+#  geom_histogram()
 ```
 
 Task 2
@@ -110,18 +119,53 @@ Task 2
 
 **Task:** Look at the spread of GDP per capita within the continents
 
-1.  Filter the data by continent
-2.  Select the GDP per capita
-3.  Find the minimum and maximum values by: (i) analyzing the range; (ii) querying the min and max directly
-4.  Present the data in a table
-5.  Visualize the data in a graph
-6.  Interpret the data
+The initial approach is similar to Task 1: *1. Filter the data by continent* *2. Select the GDP per capita* Now, let's consider the spread of the data, rather than the upper and lower limits: 3. Find the spread of the data 4. Present the data in a table 5. Visualize the data in a graph 6. Interpret the data (i) Say we want to compare the relative ranges. We could compare just the min and max, but we will get a more complete picture by looking at the distribution. (ii) Perhaps we want to know which continent has the widest spread? Narrowest spread? (iii) Referred to *Reflections:* *What different observations would I make based on this data vs. the previous? What are the adv/disadv of this analysis?* <https://www.dummies.com/programming/r/how-to-check-quantiles-in-r/> *the min and max values determined in Task 1 are also shown in the spread, but the spread also gives us more information* *Could also filter for a specific year or range of years; could also use faceting to display min/max per continent for all years*
 
-<!-- -->
+``` r
+# Select the necessary data and group to reduce the size; Find the spread of values per continent
+#Evaluate the data range using statistical commands
+gapminder %>% 
+  select(continent, gdpPercap) %>% 
+  group_by(continent) %>% 
+    summarize(Mean=mean(gdpPercap), SD=sd(gdpPercap), Var=var(gdpPercap))
+```
 
-1.  Say we want to compare the relative ranges. We could compare just the min and max, but we will get a more complete picture by looking at the distribution.
-2.  Perhaps we want to know which continent has the widest spread? Narrowest spread?
-3.  *Reflections:*
+    ## # A tibble: 5 x 4
+    ##   continent   Mean     SD        Var
+    ##   <fct>      <dbl>  <dbl>      <dbl>
+    ## 1 Africa     2194.  2828.   7997187.
+    ## 2 Americas   7136.  6397.  40918591.
+    ## 3 Asia       7902. 14045. 197272506.
+    ## 4 Europe    14469.  9355.  87520020.
+    ## 5 Oceania   18622.  6359.  40436669.
+
+``` r
+#Visualize the data in a graph (violin plot)
+gapminder %>% 
+  select(continent, gdpPercap) %>% 
+  group_by(continent) %>% 
+    ggplot(aes(continent, gdpPercap)) +
+    geom_violin() +
+  #Add labels
+  labs(title = "Spread of GDP per capita, all years",
+  x = "Continent", y = "GDP per capita ($)")
+```
+
+![](hw03-gapminder_files/figure-markdown_github/unnamed-chunk-4-1.png)
+
+``` r
+#Visualize the data in a graph (box plot)
+gapminder %>% 
+  select(continent, gdpPercap) %>% 
+  group_by(continent) %>% 
+    ggplot(aes(continent, gdpPercap)) +
+    geom_boxplot() +
+  #Add labels
+  labs(title = "Spread of GDP per capita, all years",
+  x = "Continent", y = "GDP per capita ($)")
+```
+
+![](hw03-gapminder_files/figure-markdown_github/unnamed-chunk-4-2.png)
 
 Task 3
 ------

@@ -72,9 +72,19 @@ ggplot(min_max_gdp, aes(x = continent, y = value, color = variable)) +
   #Change y-axis to log-scale given the wide range in values
   #scale_y_log10() +
   #Add labels
-  labs(title = "Minimum & Maximum GDP per capita, over all years",
+  labs(title = "Minimum & Maximum GDP per capita, all years",
   x = "Continent", y = "GDP per capita ($)", color = "Legend\n") +
   scale_color_manual(labels = c("Maximum", "Minimum"), values = c("green", "red"))
+
+#Another way to interpret the data
+# gapminder %>% 
+#   select(year, continent, country, gdpPercap) %>% 
+#       group_by(continent) %>% 
+#         group_by(year) %>% 
+#          summarize(min_gdp = min(gdpPercap))
+#ggplot(min_max_gdp, aes(gdpPercap)) +
+#  facet_wrap( ~ continent, scale = "free_x") +
+#  geom_histogram()
 
 ```
 
@@ -96,7 +106,8 @@ Now, let's consider the spread of the data, rather than the upper and lower limi
 *Reflections:*
 *What different observations would I make based on this data vs. the previous? What are the adv/disadv of this analysis?*
 https://www.dummies.com/programming/r/how-to-check-quantiles-in-r/
-
+*the min and max values determined in Task 1 are also shown in the spread, but the spread also gives us more information*
+*Could also filter for a specific year or range of years; could also use faceting to display min/max per continent for all years*
 
 ```{r}
 # Select the necessary data and group to reduce the size; Find the spread of values per continent
@@ -106,16 +117,25 @@ gapminder %>%
   group_by(continent) %>% 
     summarize(Mean=mean(gdpPercap), SD=sd(gdpPercap), Var=var(gdpPercap))
 
-#Visualize the data in a graph (try box plot, violin plot)
-ggplot(min_max_gdp, aes(x = continent, y = value, color = variable)) +
-  geom_point(aes(y = min_gdpPercap, col = "min_gdpPercap"), size=20, shape = "-") +
-  geom_point(aes(y = max_gdpPercap, col = "max_gdpPercap"), size=20, shape = "-") +
-  #Change y-axis to log-scale given the wide range in values
-  #scale_y_log10() +
+#Visualize the data in a graph (violin plot)
+gapminder %>% 
+  select(continent, gdpPercap) %>% 
+  group_by(continent) %>% 
+    ggplot(aes(continent, gdpPercap)) +
+    geom_violin() +
   #Add labels
-  labs(title = "Minimum & Maximum GDP per capita, over all years",
-  x = "Continent", y = "GDP per capita ($)", color = "Legend\n") +
-  scale_color_manual(labels = c("Maximum", "Minimum"), values = c("green", "red"))
+  labs(title = "Spread of GDP per capita, all years",
+  x = "Continent", y = "GDP per capita ($)")
+
+#Visualize the data in a graph (box plot)
+gapminder %>% 
+  select(continent, gdpPercap) %>% 
+  group_by(continent) %>% 
+    ggplot(aes(continent, gdpPercap)) +
+    geom_boxplot() +
+  #Add labels
+  labs(title = "Spread of GDP per capita, all years",
+  x = "Continent", y = "GDP per capita ($)")
 ```
 
 
